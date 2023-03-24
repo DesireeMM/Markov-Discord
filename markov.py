@@ -2,7 +2,9 @@
 
 import sys
 from random import choice
-
+import discord
+import os
+DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
 
 def open_and_read_file(filenames):
     """Take list of files. Open them, read them, and return one long string."""
@@ -68,3 +70,24 @@ text = open_and_read_file(filenames)
 
 # Get a Markov chain
 chains = make_chains(text)
+
+ran_out = make_text(chains)
+
+intents = discord.Intents.default()
+intents.message_content = True
+
+client = discord.Client(intents=intents)
+
+@client.event
+async def on_ready():
+    print(f'We have logged in as {client.user}')
+
+@client.event
+async def on_message(message):
+    if message.author == client.user:
+        return
+
+    if message.content.startswith('$hello'):
+        await message.channel.send(ran_out)
+
+client.run(DISCORD_TOKEN)
